@@ -1,27 +1,35 @@
 package br.com.mastertech.dnd;
 
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
-@RestController
+@Controller
 public class AppController {
     @GetMapping
     public String mostrarHome(){
-        return "<h1>Boas Vindas!</h1>" +
-                "<a href=\"form\">Iniciar</a>";
+        return "index";
     }
 
     @GetMapping("/form")
     public String mostrarForm(){
-        return "<form action=\"resultado\">" +
-                "<input type=\"text\" placeholder=\"Lados\">" +
-                "<input type=\"text\" placeholder=\"Vezes\">" +
-                "<button>Jogar</button>" +
-                "</form>";
+        return "form";
     }
 
-    @GetMapping("/resultado")
-    public String mostrarResultado(){
-        return "<p>O resultado é 100";
+    @PostMapping("/resultado")
+    public String mostrarResultado(@ModelAttribute Formulario formulario, Model model) throws DadoInvalidoException {
+        try {
+            Dado dado = new Dado(formulario.getLados());
+            Sorteador sorteador = new Sorteador(dado);
+            Resultado resultado = sorteador.sortear(formulario.getVezes());
+
+            model.addAttribute("resultado", resultado);
+
+            return "resultado";
+        }catch (DadoInvalidoException e) {
+            return "erro";
+        }
     }
 }
